@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Para Mi Amor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .background {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .background span {
+      position: absolute;
+      white-space: nowrap;
+      color: #ff99cc;
+      font-size: 16px;
+      animation: scrollText 20s linear infinite;
+    }
+
+    @keyframes scrollText {
+      0% {
+        transform: translateY(100vh);
+      }
+      100% {
+        transform: translateY(-100vh);
+      }
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      color: #ff99cc;
+      text-shadow: 0 0 10px #ff99cc;
+    }
+
+        header h3 {
+      font-size: 1.0em;
+      color: #ff99cc;
+      text-shadow: 0 0 10px #ff99cc;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .btn {
+      background: #ff3399;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      margin: 15px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: not-allowed;
+      opacity: 0.5;
+      transition: 0.3s;
+      box-shadow: 0 0 10px #ff3399;
+      max-width: 90%;
+    }
+
+    .btn.enabled {
+      cursor: pointer;
+      opacity: 1;
+    }
+
+    .contador {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #ccc;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 2em;
+      }
+
+      .btn {
+        font-size: 1em;
+        padding: 12px 24px;
+      }
+
+      .contador {
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background" id="fondo"></div>
+  <header>
+    <h1>Para Mi Amor ❤</h1>
+    <h3>Hoy te regalo con mucho amor un poco de mi talento</h3>
+  </header>
+  <div class="menu">
+    <button id="btnCumple" class="btn" disabled>🎂 Feliz Cumpleaños</button>
+    <div class="contador" id="contadorCumple"></div>
+
+    <button id="btnAniversario" class="btn" disabled>💖 2do Aniversario</button>
+    <div class="contador" id="contadorAniversario"></div>
+  </div>
+
+  <script>
+    // Generador de "Te amo"
+    const fondo = document.getElementById('fondo');
+    for (let i = 0; i < 80; i++) {
+      const span = document.createElement('span');
+      span.textContent = 'Te amo '.repeat(12);
+      span.style.left = Math.random() * 100 + 'vw';
+      span.style.animationDuration = (10 + Math.random() * 20) + 's';
+      fondo.appendChild(span);
+    }
+
+    // Fechas objetivo
+    const fechaCumple = new Date("2025-07-27T00:00:00");
+    const fechaAniversario = new Date("2025-10-08T00:00:00");
+
+    const btnCumple = document.getElementById("btnCumple");
+    const btnAniversario = document.getElementById("btnAniversario");
+    const contadorCumple = document.getElementById("contadorCumple");
+    const contadorAniversario = document.getElementById("contadorAniversario");
+
+    function actualizarContadores() {
+      const ahora = new Date();
+
+      actualizarContadorYBoton(fechaCumple, ahora, btnCumple, contadorCumple);
+      actualizarContadorYBoton(fechaAniversario, ahora, btnAniversario, contadorAniversario);
+    }
+
+    function actualizarContadorYBoton(fecha, ahora, boton, contador) {
+      const diferencia = fecha - ahora;
+
+      if (diferencia <= 0) {
+        boton.classList.add('enabled');
+        boton.disabled = false;
+        boton.style.cursor = 'pointer';
+        contador.textContent = "¡Disponible! 💝";
+
+        if (boton.id === "btnCumple") {
+          boton.onclick = () => window.location.href = "cumple.html";
+        } else if (boton.id === "btnAniversario") {
+          boton.onclick = () => window.location.href = "aniversario.html";
+        }
+
+      } else {
+        const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+        const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
+        const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
+        const segundos = Math.floor((diferencia / 1000) % 60);
+
+        contador.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+      }
+    }
+
+    setInterval(actualizarContadores, 1000);
+  </script>
+</body>
+</html>

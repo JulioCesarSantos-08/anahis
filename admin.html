@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Agregar Frases y Poemas</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff66cc;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #ff99cc;
+      margin-top: 40px;
+    }
+
+    textarea {
+      width: 80%;
+      max-width: 600px;
+      height: 120px;
+      resize: none;
+      font-size: 1em;
+      padding: 12px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background: #ff3399;
+      color: #fff;
+      font-size: 1em;
+      padding: 12px 20px;
+      margin: 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #cc0066;
+    }
+
+    .mensaje {
+      margin-top: 10px;
+      color: #90ee90;
+    }
+
+    @media (max-width: 600px) {
+      textarea {
+        width: 95%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>💖 Panel Romántico - Admin 💖</h1>
+
+  <!-- Sección Frases -->
+  <h2>Agregar Frase</h2>
+  <textarea id="nuevaFrase" placeholder="Escribe una nueva frase de amor..."></textarea><br />
+  <button onclick="guardarFrase()">❤️ Guardar Frase</button>
+  <p id="mensajeFrase" class="mensaje"></p>
+
+  <!-- Sección Poemas -->
+  <h2>Agregar Poema</h2>
+  <textarea id="nuevoPoema" placeholder="Escribe un poema para tu amor..."></textarea><br />
+  <button onclick="guardarPoema()">📝 Guardar Poema</button>
+  <p id="mensajePoema" class="mensaje"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc
+    } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA0OWKnhz0jmGiiiGwotDpkEhEj_tCUvjs",
+      authDomain: "pedidospuestocomida.firebaseapp.com",
+      projectId: "pedidospuestocomida",
+      storageBucket: "pedidospuestocomida.firebasestorage.app",
+      messagingSenderId: "251357525868",
+      appId: "1:251357525868:web:9cf755590e16fdff686549"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.guardarFrase = async () => {
+      const texto = document.getElementById("nuevaFrase").value.trim();
+      if (texto === "") return;
+
+      try {
+        await addDoc(collection(db, "frases_cumple"), { texto });
+        document.getElementById("mensajeFrase").textContent = "💌 Frase guardada con éxito.";
+        document.getElementById("nuevaFrase").value = "";
+      } catch (e) {
+        document.getElementById("mensajeFrase").textContent = "⚠️ Error al guardar la frase.";
+      }
+    };
+
+    window.guardarPoema = async () => {
+      const texto = document.getElementById("nuevoPoema").value.trim();
+      if (texto === "") return;
+
+      try {
+        await addDoc(collection(db, "poemas_cumple"), { texto });
+        document.getElementById("mensajePoema").textContent = "📜 Poema guardado con éxito.";
+        document.getElementById("nuevoPoema").value = "";
+      } catch (e) {
+        document.getElementById("mensajePoema").textContent = "⚠️ Error al guardar el poema.";
+      }
+    };
+  </script>
+</body>
+</html>

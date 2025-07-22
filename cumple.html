@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎉 Feliz Cumpleaños Amor 🎉</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to right, #ffafbd, #ffc3a0);
+      font-family: 'Segoe UI', sans-serif;
+      color: #4d0039;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      margin-top: 20px;
+      text-shadow: 0 0 8px white;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+    }
+
+    .menu-btn {
+      background: #fff;
+      color: #e60073;
+      border: 2px solid #e60073;
+      padding: 15px 25px;
+      font-size: 1.2em;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 0, 100, 0.3);
+      transition: 0.3s;
+      margin: 10px;
+    }
+
+    .menu-btn:hover {
+      background: #e60073;
+      color: white;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .bloque {
+      background: white;
+      color: #e60073;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+    }
+
+    .imagen-fondo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.1;
+      border-radius: 15px;
+      z-index: 0;
+    }
+
+    .contenido, .titulo, .temporizador {
+      position: relative;
+      z-index: 1;
+    }
+
+    .titulo {
+      font-size: 1.6em;
+      margin-bottom: 10px;
+    }
+
+    .contenido {
+      font-size: 1.3em;
+      margin-top: 10px;
+    }
+
+    .temporizador {
+      font-size: 0.9em;
+      color: #888;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2em; }
+      .menu-btn { width: 90%; font-size: 1em; }
+      .bloque { font-size: 1.1em; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎂 ¡Feliz Cumpleaños, Mi Amor! 🎂</h1>
+  <p>Hoy celebramos tu vida, y cada segundo contigo es un regalo 💝</p>
+
+  <div class="container">
+    <!-- Frases -->
+    <div class="bloque">
+      <img class="imagen-fondo" id="imgFrase" src="" alt="imagen romantica"/>
+      <div class="titulo">💖 100 cosas por las que te amo</div>
+      <button class="menu-btn" onclick="mostrarFrase()">Mostrar frase</button>
+      <div class="contenido" id="fraseContainer">Haz clic para comenzar</div>
+      <div class="temporizador" id="fraseTimer"></div>
+    </div>
+
+    <!-- Poemas -->
+    <div class="bloque">
+      <img class="imagen-fondo" id="imgPoema" src="" alt="imagen romantica"/>
+      <div class="titulo">📜 Poema para ti</div>
+      <button class="menu-btn" onclick="mostrarPoema()">Mostrar poema</button>
+      <div class="contenido" id="poemaContainer">Haz clic para comenzar</div>
+      <div class="temporizador" id="poemaTimer"></div>
+    </div>
+
+    <!-- Reproductor de música -->
+    <div class="bloque">
+      <img class="imagen-fondo" id="imgMusica" src="" alt="imagen romantica"/>
+      <div class="titulo">🎧 Canciones que me recuerdan a ti</div>
+      <div class="contenido" id="reproductorContainer">
+        <p id="cancionActual">Haz clic para escuchar 🎶</p>
+        <audio id="player" src="" preload="auto"></audio>
+        <div style="margin-top: 10px;">
+          <button class="menu-btn" onclick="anteriorCancion()">⏮️</button>
+          <button class="menu-btn" onclick="toggleReproduccion()">▶️ / ⏸️</button>
+          <button class="menu-btn" onclick="siguienteCancion()">⏭️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, doc, getDoc, setDoc
+    } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA0OWKnhz0jmGiiiGwotDpkEhEj_tCUvjs",
+      authDomain: "pedidospuestocomida.firebaseapp.com",
+      projectId: "pedidospuestocomida",
+      storageBucket: "pedidospuestocomida.firebasestorage.app",
+      messagingSenderId: "251357525868",
+      appId: "1:251357525868:web:9cf755590e16fdff686549"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let frases = [], poemas = [];
+
+    await cargarContenido();
+
+    async function cargarContenido() {
+      const frasesSnapshot = await getDocs(collection(db, "frases_cumple"));
+      frases = frasesSnapshot.docs.map(doc => doc.data().texto);
+
+      const poemasSnapshot = await getDocs(collection(db, "poemas_cumple"));
+      poemas = poemasSnapshot.docs.map(doc => doc.data().texto);
+    }
+
+    async function mostrarFrase() {
+      const ahora = Date.now();
+      const docRef = doc(db, "temporizador", "frase");
+      const docSnap = await getDoc(docRef);
+      const ultimo = docSnap.exists() ? docSnap.data().timestamp : 0;
+
+      if (ahora - ultimo < 60000) {
+        const tiempoRestante = 60000 - (ahora - ultimo);
+        iniciarTemporizador(tiempoRestante, 'fraseTimer');
+        alert("Debes esperar un poco más para ver otra frase 💖");
+        return;
+      }
+
+      const frase = frases[Math.floor(Math.random() * frases.length)];
+      document.getElementById('fraseContainer').textContent = frase;
+      document.getElementById('imgFrase').src = obtenerImagenAleatoria();
+      await setDoc(docRef, { timestamp: ahora });
+      iniciarTemporizador(60000, 'fraseTimer');
+    }
+
+    async function mostrarPoema() {
+      const ahora = Date.now();
+      const docRef = doc(db, "temporizador", "poema");
+      const docSnap = await getDoc(docRef);
+      const ultimo = docSnap.exists() ? docSnap.data().timestamp : 0;
+
+      if (ahora - ultimo < 60000) {
+        const tiempoRestante = 60000 - (ahora - ultimo);
+        iniciarTemporizador(tiempoRestante, 'poemaTimer');
+        alert("Debes esperar un poco más para otro poema 💌");
+        return;
+      }
+
+      const poema = poemas[Math.floor(Math.random() * poemas.length)];
+      document.getElementById('poemaContainer').textContent = poema;
+      document.getElementById('imgPoema').src = obtenerImagenAleatoria();
+      await setDoc(docRef, { timestamp: ahora });
+      iniciarTemporizador(60000, 'poemaTimer');
+    }
+
+    function iniciarTemporizador(ms, elementoId) {
+      const el = document.getElementById(elementoId);
+      let tiempo = Math.ceil(ms / 1000);
+      el.textContent = `⏳ Espera: ${tiempo} segundos`;
+
+      const intervalo = setInterval(() => {
+        tiempo--;
+        if (tiempo <= 0) {
+          clearInterval(intervalo);
+          el.textContent = "";
+        } else {
+          el.textContent = `⏳ Espera: ${tiempo} segundos`;
+        }
+      }, 1000);
+    }
+
+    const imagenes = [
+      "imagenes/foto1.jpg",
+      "imagenes/foto2.jpg",
+      "imagenes/foto3.jpg",
+      "imagenes/foto4.jpg"
+    ];
+
+    function obtenerImagenAleatoria() {
+      return imagenes[Math.floor(Math.random() * imagenes.length)];
+    }
+
+    const canciones = [
+      { nombre: "Nuestra canción 1", archivo: "musica/cancion1.mp3" },
+      { nombre: "Esa vez que te vi", archivo: "musica/cancion2.mp3" },
+      { nombre: "Solo tú", archivo: "musica/cancion3.mp3" }
+    ];
+
+    let indiceActual = 0;
+    const player = document.getElementById("player");
+    const cancionActual = document.getElementById("cancionActual");
+
+    function cargarCancion(index) {
+      player.src = canciones[index].archivo;
+      cancionActual.textContent = `🎵 ${canciones[index].nombre}`;
+      document.getElementById('imgMusica').src = obtenerImagenAleatoria();
+      player.play();
+    }
+
+    function toggleReproduccion() {
+      if (player.src === "") {
+        cargarCancion(indiceActual);
+      } else if (player.paused) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    }
+
+    function siguienteCancion() {
+      indiceActual = (indiceActual + 1) % canciones.length;
+      cargarCancion(indiceActual);
+    }
+
+    function anteriorCancion() {
+      indiceActual = (indiceActual - 1 + canciones.length) % canciones.length;
+      cargarCancion(indiceActual);
+    }
+
+    window.mostrarFrase = mostrarFrase;
+    window.mostrarPoema = mostrarPoema;
+    window.toggleReproduccion = toggleReproduccion;
+    window.siguienteCancion = siguienteCancion;
+    window.anteriorCancion = anteriorCancion;
+  </script>
+</body>
+</html>
