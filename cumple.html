@@ -65,6 +65,10 @@
       position: relative;
     }
 
+    .bloque.musica {
+      overflow: hidden;
+    }
+
     .imagen-fondo {
       position: absolute;
       top: 0;
@@ -72,7 +76,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.1;
+      opacity: 0.7;
       border-radius: 15px;
       z-index: 0;
     }
@@ -112,7 +116,6 @@
   <div class="container">
     <!-- Frases -->
     <div class="bloque">
-      <img class="imagen-fondo" id="imgFrase" src="" alt="imagen romantica"/>
       <div class="titulo">💖 100 cosas por las que te amo</div>
       <button class="menu-btn" onclick="mostrarFrase()">Mostrar frase</button>
       <div class="contenido" id="fraseContainer">Haz clic para comenzar</div>
@@ -121,15 +124,14 @@
 
     <!-- Poemas -->
     <div class="bloque">
-      <img class="imagen-fondo" id="imgPoema" src="" alt="imagen romantica"/>
       <div class="titulo">📜 Poema para ti</div>
       <button class="menu-btn" onclick="mostrarPoema()">Mostrar poema</button>
       <div class="contenido" id="poemaContainer">Haz clic para comenzar</div>
       <div class="temporizador" id="poemaTimer"></div>
     </div>
 
-    <!-- Reproductor de música -->
-    <div class="bloque">
+    <!-- Música -->
+    <div class="bloque musica">
       <img class="imagen-fondo" id="imgMusica" src="" alt="imagen romantica"/>
       <div class="titulo">🎧 Canciones que me recuerdan a ti</div>
       <div class="contenido" id="reproductorContainer">
@@ -144,6 +146,7 @@
     </div>
   </div>
 
+  <!-- Firebase y funciones -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
     import {
@@ -154,7 +157,7 @@
       apiKey: "AIzaSyA0OWKnhz0jmGiiiGwotDpkEhEj_tCUvjs",
       authDomain: "pedidospuestocomida.firebaseapp.com",
       projectId: "pedidospuestocomida",
-      storageBucket: "pedidospuestocomida.firebasestorage.app",
+      storageBucket: "pedidospuestocomida.appspot.com",
       messagingSenderId: "251357525868",
       appId: "1:251357525868:web:9cf755590e16fdff686549"
     };
@@ -162,16 +165,52 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let frases = [], poemas = [];
+    const frases = [];
+    const poemas = [];
 
-    await cargarContenido();
+    const imagenes = [
+      "imagenes/1.png",
+      "imagenes/2.png",
+      "imagenes/3.png",
+      "imagenes/4.png"
+    ];
+
+    const canciones = [
+      { nombre: "Quizás", archivo: "musica/cancion1.mp3" },
+      { nombre: "Toda esta ciudad", archivo: "musica/cancion2.mp3" },
+      { nombre: "Coincidir", archivo: "musica/cancion3.mp3" }
+    ];
+
+    const player = document.getElementById("player");
+    const cancionActual = document.getElementById("cancionActual");
+    let indiceActual = 0;
+
+    function obtenerImagenAleatoria() {
+      return imagenes[Math.floor(Math.random() * imagenes.length)];
+    }
+
+    function iniciarTemporizador(ms, elementoId) {
+      const el = document.getElementById(elementoId);
+      let tiempo = Math.ceil(ms / 1000);
+      el.textContent = `⏳ Espera: ${tiempo} segundos`;
+
+      const intervalo = setInterval(() => {
+        tiempo--;
+        if (tiempo <= 0) {
+          clearInterval(intervalo);
+          el.textContent = "";
+        } else {
+          el.textContent = `⏳ Espera: ${tiempo} segundos`;
+        }
+      }, 1000);
+    }
 
     async function cargarContenido() {
       const frasesSnapshot = await getDocs(collection(db, "frases_cumple"));
-      frases = frasesSnapshot.docs.map(doc => doc.data().texto);
+      frases.push(...frasesSnapshot.docs.map(doc => doc.data().texto));
 
       const poemasSnapshot = await getDocs(collection(db, "poemas_cumple"));
-      poemas = poemasSnapshot.docs.map(doc => doc.data().texto);
+      poemas.push(...poemasSnapshot.docs.map(doc => doc.data().texto));
     }
 
     async function mostrarFrase() {
@@ -189,7 +228,6 @@
 
       const frase = frases[Math.floor(Math.random() * frases.length)];
       document.getElementById('fraseContainer').textContent = frase;
-      document.getElementById('imgFrase').src = obtenerImagenAleatoria();
       await setDoc(docRef, { timestamp: ahora });
       iniciarTemporizador(60000, 'fraseTimer');
     }
@@ -209,47 +247,9 @@
 
       const poema = poemas[Math.floor(Math.random() * poemas.length)];
       document.getElementById('poemaContainer').textContent = poema;
-      document.getElementById('imgPoema').src = obtenerImagenAleatoria();
       await setDoc(docRef, { timestamp: ahora });
       iniciarTemporizador(60000, 'poemaTimer');
     }
-
-    function iniciarTemporizador(ms, elementoId) {
-      const el = document.getElementById(elementoId);
-      let tiempo = Math.ceil(ms / 1000);
-      el.textContent = `⏳ Espera: ${tiempo} segundos`;
-
-      const intervalo = setInterval(() => {
-        tiempo--;
-        if (tiempo <= 0) {
-          clearInterval(intervalo);
-          el.textContent = "";
-        } else {
-          el.textContent = `⏳ Espera: ${tiempo} segundos`;
-        }
-      }, 1000);
-    }
-
-    const imagenes = [
-      "imagenes/1.png",
-      "imagenes/2.png",
-      "imagenes/3.png",
-      "imagenes/4.png"
-    ];
-
-    function obtenerImagenAleatoria() {
-      return imagenes[Math.floor(Math.random() * imagenes.length)];
-    }
-
-    const canciones = [
-      { nombre: "Nuestra canción 1", archivo: "musica/cancion1.mp3" },
-      { nombre: "Esa vez que te vi", archivo: "musica/cancion2.mp3" },
-      { nombre: "Solo tú", archivo: "musica/cancion3.mp3" }
-    ];
-
-    let indiceActual = 0;
-    const player = document.getElementById("player");
-    const cancionActual = document.getElementById("cancionActual");
 
     function cargarCancion(index) {
       player.src = canciones[index].archivo;
@@ -259,7 +259,7 @@
     }
 
     function toggleReproduccion() {
-      if (player.src === "") {
+      if (!player.src) {
         cargarCancion(indiceActual);
       } else if (player.paused) {
         player.play();
@@ -283,6 +283,8 @@
     window.toggleReproduccion = toggleReproduccion;
     window.siguienteCancion = siguienteCancion;
     window.anteriorCancion = anteriorCancion;
+
+    cargarContenido();
   </script>
 </body>
 </html>
